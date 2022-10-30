@@ -1,0 +1,79 @@
+experiment-name: test
+use_gpu: yes
+global-seed: 42
+
+evaluator: ucr_evaluator
+
+logging:
+  logger-name: anomaly-detection
+  log-location: ./out/runs/test
+
+autoencoder:
+  type: AE
+  latent_dim: 4
+  encoder:
+    layers:
+      - name: LSTM
+        config:
+          input_size: 1
+          hidden_size: 1
+          num_layers: 1
+          batch_first: true
+      - name: RNNExtract
+      - name: Reshape
+        config:
+          out_shape: [ -1, 175 ]
+      - name: ReLU
+      - name: Linear
+        config:
+          in_features: 175
+          out_features: 10
+  decoder:
+    layers:
+      - name: Linear
+        config:
+          in_features: 4
+          out_features: 24
+      - name: ReLU
+      - name: Linear
+        config:
+          in_features: 24
+          out_features: 175
+      - name: ReLU
+      - name: Reshape
+        config:
+          out_shape: [ -1, 175,1 ]
+      - name: LSTM
+        config:
+          input_size: 1
+          hidden_size: 1
+          num_layers: 1
+          batch_first: true
+      - name: RNNExtract
+
+training:
+  trainer_name: 'ae_trainer'
+  epochs: 10
+  batch_size: 1024
+  kl_weight: 1.0e-5
+  infos: True
+
+data:
+  data-set: ucr
+  location: /home/robin/Documents/lbnl/crd/datasets/AnomalyDatasets_2021/UCR_TimeSeriesAnomalyDatasets2021/FilesAreInHere/UCR_Anomaly_FullData
+  # will be overridden by main function with run_dir
+  #  cache_location: ./data-cache/ucr
+  set_number: '121'
+  t_steps: 175
+  cache_name: 'ucr-002-90'
+  compression: zip
+
+downstream:
+  type: 'SRD'
+  config:
+    batch_size: 10000
+    density:
+      type: 'kdepy'
+      config:
+        plot_density: True
+        bandwith: 'ISJ'

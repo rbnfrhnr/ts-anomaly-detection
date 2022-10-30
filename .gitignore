@@ -1,0 +1,7 @@
+/venv/
+/downloaded_data/
+
+/data-cache/
+/config/generated/
+/out/
+/.ipynb_checkpoints/

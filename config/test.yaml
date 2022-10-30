@@ -1,0 +1,92 @@
+experiment-name: test
+use_gpu: yes
+
+evaluator: ucr_evaluator
+
+logging:
+  logger-name: anomaly-detection
+  log-location: ./out/runs/test
+
+augmentation:
+#  name: "none"
+  name: vae_generate
+  config:
+    generator_location: "./out/runs/hp_sweep/generator_hp_sweep/generator_hp_sweep-2022-10-30-10-57-21/model-checkpoints/model-final.pkl"
+    std: 0.1
+
+
+autoencoder:
+  type: VAE
+  latent_dim: 4
+  encoder:
+    layers:
+      - name: LSTM
+        config:
+          input_size: 1
+          hidden_size: 1
+          num_layers: 1
+          batch_first: true
+      - name: RNNExtract
+      - name: Reshape
+        config:
+          out_shape: [ -1, 20 ]
+      - name: ReLU
+      - name: Linear
+        config:
+          in_features: 20
+          out_features: 10
+  decoder:
+    layers:
+      - name: Linear
+        config:
+          in_features: 4
+          out_features: 24
+      - name: ReLU
+      - name: Linear
+        config:
+          in_features: 24
+          out_features: 20
+      - name: ReLU
+      - name: Reshape
+        config:
+          out_shape: [ -1, 20,1 ]
+      - name: LSTM
+        config:
+          input_size: 1
+          hidden_size: 1
+          num_layers: 1
+          batch_first: true
+      - name: RNNExtract
+
+training:
+  trainer_name: 'vae_trainer'
+  epochs: 500
+  batch_size: 512
+  kl_weight: 1.0e-5
+  infos: True
+  save_checkpoint: true
+  checkpoint_interval: 50
+  save_best: true
+  save_latest: true
+
+data:
+  data-set: ucr
+  location: /home/robin/Documents/lbnl/crd/datasets/AnomalyDatasets_2021/UCR_TimeSeriesAnomalyDatasets2021/FilesAreInHere/UCR_Anomaly_FullData
+  # will be overridden by main function with run_dir
+  #  cache_location: ./data-cache/ucr
+  #  set_number: '197'
+  set_number: '006'
+  t_steps: 20
+  cache_name: 'ucr-002-90'
+  compression: zip
+
+downstream:
+  type: 'SRD'
+  config:
+    batch_size: 10000
+    density:
+      type: 'kdepy'
+      config:
+        plot_density: True
+        #        bandwith: 'ISJ'
+        bandwith: 'silverman'
