@@ -60,3 +60,20 @@ def setup_run(logging={}, **cfg):
     with open(r'' + run_dir + '/run-config.yaml', 'w') as file:
         documents = yaml.dump(cfg, file)
     return cfg
+
+
+def replace_vars_in_cfg(node, vals):
+    if isinstance(node, dict):
+        node = {k: traverse(v, vals) for k, v in node.items()}
+
+    if isinstance(node, list):
+        node = [traverse(v, vals) for v in node]
+
+    if isinstance(node, str):
+        match = path_matcher.match(node)
+        if match:
+            env_var = match.group()[2:-1]
+            return vals[env_var]
+        return node
+
+    return node

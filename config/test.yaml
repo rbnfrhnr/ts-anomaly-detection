@@ -8,11 +8,12 @@ logging:
   log-location: ./out/runs/test
 
 augmentation:
-#  name: "none"
-  name: vae_generate
+  name: "noise"
+#  name: vae_generate
   config:
     generator_location: "./out/runs/hp_sweep/generator_hp_sweep/generator_hp_sweep-2022-10-30-10-57-21/model-checkpoints/model-final.pkl"
     std: 0.1
+    mean: 0.0
 
 
 autoencoder:

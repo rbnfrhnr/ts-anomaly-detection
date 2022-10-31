@@ -44,7 +44,7 @@ class UCRDataset(Dataset):
             train_x = scaler.transform(train_x)
             test_x = scaler.transform(test_x)
             if self.batch_transform:
-                train_x_transformed = self.batch_transform(train_x.reshape((*train_x.shape, 1)))
+                train_x_transformed = self.batch_transform(train_x)
                 train_x = np.concatenate([train_x, train_x_transformed])
                 train_y = np.repeat(train_y, 2).reshape(-1, 1)
 

@@ -4,6 +4,7 @@ import sys
 import time
 from itertools import product
 from pathlib import Path
+from utils.common import replace_vars_in_cfg
 
 import yaml
 
@@ -16,23 +17,6 @@ def path_constructor(loader, node, vals):
     match = path_matcher.match(value)
     env_var = match.group()[2:-1]
     return os.environ.get(env_var) + value[match.end():]
-
-
-def traverse(node, vals):
-    if isinstance(node, dict):
-        node = {k: traverse(v, vals) for k, v in node.items()}
-
-    if isinstance(node, list):
-        node = [traverse(v, vals) for v in node]
-
-    if isinstance(node, str):
-        match = path_matcher.match(node)
-        if match:
-            env_var = match.group()[2:-1]
-            return vals[env_var]
-        return node
-
-    return node
 
 
 if __name__ == '__main__':
@@ -54,7 +38,7 @@ if __name__ == '__main__':
         for idx, comb in enumerate(combs):
             print("iter", i, "comb idx", idx, "of", len(combs))
             comb_dict = {key: comb[idx] for idx, key in enumerate(val_keys)}
-            cfg_patched = traverse(cfg.copy(), comb_dict)
+            cfg_patched = replace_vars_in_cfg(cfg.copy(), comb_dict)
             str_comb = [str(v) for v in comb]
             f_name = "-".join(str_comb) + ".yaml"
             file = generated_path + f_name
