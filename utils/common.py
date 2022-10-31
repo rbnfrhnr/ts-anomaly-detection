@@ -3,12 +3,13 @@ import random
 from datetime import datetime
 from pathlib import Path
 
+import re
 import numpy as np
 import torch
 import yaml
 
-ucr_sets = [6, 22, 28, 33, 35, 53, 54, 59, 62, 70, 83, 102, 114, 119, 121,
-            123, 131, 138, 173, 193, 197, 221, 229, 236, 249]
+ucr_sets = ['006', '022', '028', '033', '035', '053', '054', '059', '062', '070', '083', '102', '114',
+            '119', '121', '123', '131', '138', '173', '193', '197', '221', '229', '236', '249']
 
 
 def read_cfg(cfg_file):
@@ -62,12 +63,15 @@ def setup_run(logging={}, **cfg):
     return cfg
 
 
+path_matcher = re.compile(r'\$\{([^}^{]+)\}')
+
+
 def replace_vars_in_cfg(node, vals):
     if isinstance(node, dict):
-        node = {k: traverse(v, vals) for k, v in node.items()}
+        node = {k: replace_vars_in_cfg(v, vals) for k, v in node.items()}
 
     if isinstance(node, list):
-        node = [traverse(v, vals) for v in node]
+        node = [replace_vars_in_cfg(v, vals) for v in node]
 
     if isinstance(node, str):
         match = path_matcher.match(node)

@@ -8,21 +8,11 @@ from utils.common import replace_vars_in_cfg
 
 import yaml
 
-path_matcher = re.compile(r'\$\{([^}^{]+)\}')
-
-
-def path_constructor(loader, node, vals):
-    ''' Extract the matched value, expand env variable, and replace the match '''
-    value = node.value
-    match = path_matcher.match(value)
-    env_var = match.group()[2:-1]
-    return os.environ.get(env_var) + value[match.end():]
-
 
 if __name__ == '__main__':
     tmpl_vals = sys.argv[1]
 
-    n = 5
+    n = 10
     tmpl = "./config/templates/hp_vae_gen_tmpl.yaml"
     generated_path = "./config/templates/generated/"
     Path(generated_path).mkdir(parents=True, exist_ok=True)
@@ -45,6 +35,6 @@ if __name__ == '__main__':
             with open(file, 'w+') as outfile:
                 yaml.dump(cfg_patched, outfile, default_flow_style=False)
             t_start = time.time()
-            os.system('python3 main_model_only.py ' + file)
+            os.system('python3 main.py ' + file)
             dur = time.time() - t_start
             print("seconds:", dur)
