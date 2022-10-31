@@ -23,6 +23,7 @@ class VAEAugmentation(BaseAugmentation):
         new_z = z + torch.normal(mean=means, std=stdv)
         new_x = self.model.decoder(new_z)
         new_x = new_x.detach().cpu().numpy()
-        new_x = savgol_filter(new_x.reshape(-1, self.t_steps), math.floor((new_x.shape[1] * 0.25)), 5)
-        # new_x = new_x.reshape(*new_x.shape[1:])
+        filter_window = min(40, math.floor((new_x.shape[1] * 0.5)))
+        polyorder = min(filter_window - 1, 7)
+        new_x = savgol_filter(new_x.reshape(-1, self.t_steps), filter_window, polyorder)
         return new_x
