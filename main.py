@@ -3,7 +3,6 @@ import sys
 import torch
 
 from augmentations.augmentation_factory import get_augmentation
-from augmentations.vae_augmentation import VAEAugmentation
 from data.ucr_loader import UCRDataset
 from downstream.downstream_factory import get_downstream
 from evaluation.evaluator_factory import get_evaluator
@@ -42,8 +41,6 @@ if __name__ == '__main__':
     trainer = trainer(model=autoencoder, device=device, run_dir=run_dir, **cfg["training"])
     autoencoder, losses = trainer.train(loader)
     autoencoder.eval()
-    torch.save(autoencoder.state_dict(), run_dir + "/autoencoder.pkl")
-    torch.save(autoencoder, run_dir + "/ae-class.pkl")
     dtask = get_downstream(downstream_cfg["type"], autoencoder, **downstream_cfg["config"]).fit(loader)
 
     evaluator_fn = get_evaluator(evaluator)

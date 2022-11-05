@@ -8,7 +8,7 @@ logging:
   log-location: ./out/runs/test
 
 augmentation:
-  name: "none"
+  name: "vae_generate"
 #  name: vae_generate
   config:
     generator_location: "./out/runs/hp_sweep/generator_hp_sweep/generator_hp_sweep-2022-10-30-10-57-21/model-checkpoints/model-final.pkl"
@@ -17,53 +17,69 @@ augmentation:
 
 
 autoencoder:
-  type: AE
-  latent_dim: 4
+  type: VAE
+  latent_dim: 10
   encoder:
     layers:
       - name: LSTM
         config:
-          input_size: 1
-          hidden_size: 1
+          input_size: 25
+          hidden_size: 25
           num_layers: 1
           batch_first: true
       - name: RNNExtract
       - name: Reshape
         config:
-          out_shape: [ -1, 20 ]
+          out_shape: [ -1, 2500 ]
       - name: ReLU
       - name: Linear
         config:
-          in_features: 20
+          in_features: 2500
+          out_features: 512
+      - name: ReLU
+      - name: Linear
+        config:
+          in_features: 512
+          out_features: 128
+      - name: ReLU
+      - name: Linear
+        config:
+          in_features: 128
           out_features: 10
   decoder:
     layers:
       - name: Linear
         config:
-          in_features: 4
-          out_features: 24
+          in_features: 10
+          out_features: 128
       - name: ReLU
       - name: Linear
         config:
-          in_features: 24
-          out_features: 20
+          in_features: 128
+          out_features: 512
+      - name: ReLU
+      - name: Linear
+        config:
+          in_features: 512
+          out_features: 2500
       - name: ReLU
       - name: Reshape
         config:
-          out_shape: [ -1, 20,1 ]
+          out_shape: [ -1, 100, 25 ]
       - name: LSTM
         config:
-          input_size: 1
-          hidden_size: 1
+          input_size: 25
+          hidden_size: 25
           num_layers: 1
           batch_first: true
       - name: RNNExtract
+      - name: ReLU
 
 training:
-  trainer_name: 'ae_trainer'
-  epochs: 500
+  trainer_name: 'vae_trainer'
+  epochs: 10
   batch_size: 512
-  kl_weight: 1.0e-5
+  kl_weight: 1.0e-10
   infos: True
   save_checkpoint: true
   checkpoint_interval: 50
@@ -71,18 +87,19 @@ training:
   save_latest: true
 
 data:
-  data-set: ucr
-  location: /home/robin/Documents/lbnl/crd/datasets/AnomalyDatasets_2021/UCR_TimeSeriesAnomalyDatasets2021/FilesAreInHere/UCR_Anomaly_FullData
+  data-set: ctu
+  location: /home/robin/Documents/lbnl/crd/ctu-13/CTU-13-Dataset/
   # will be overridden by main function with run_dir
   #  cache_location: ./data-cache/ucr
   #  set_number: '197'
-  set_number: '006'
-  t_steps: 20
-  cache_name: 'ucr-002-90'
+  set_number: 5
+  t_steps: 100
+  period_len: 5
+  cache_name: 'ctu-'
   compression: zip
 
 downstream:
-  type: 'SRD'
+  type: 'DDD'
   config:
     batch_size: 10000
     density:

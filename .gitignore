@@ -5,3 +5,5 @@
 /config/generated/
 /out/
 /.ipynb_checkpoints/
+/analysis/data/
+/config/**/generated/**
