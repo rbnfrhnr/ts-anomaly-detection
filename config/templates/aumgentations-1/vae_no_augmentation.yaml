@@ -67,7 +67,7 @@ training:
 
 data:
   data-set: ucr
-  location: /home/robin/Documents/lbnl/crd/datasets/AnomalyDatasets_2021/UCR_TimeSeriesAnomalyDatasets2021/FilesAreInHere/UCR_Anomaly_FullData
+  location: ${DATA_LOCATION}
   set_number: ${SET_NUMBER}
   t_steps: ${T_STEPS}
   cache_name: 'ucr-002-90'

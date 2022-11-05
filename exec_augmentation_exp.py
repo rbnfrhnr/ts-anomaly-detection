@@ -29,7 +29,7 @@ if __name__ == '__main__':
             comb_dict["T_STEPS"] = ucr_set_to_window[comb_dict["SET_NUMBER"]]
             cfg_patched = replace_vars_in_cfg(cfg.copy(), comb_dict)
             str_comb = [str(v) for v in comb]
-            f_name = "-".join(str_comb) + ".yaml"
+            f_name = str(hash(comb)) + ".yaml"
             file = generated_path + f_name
             with open(file, 'w+') as outfile:
                 yaml.dump(cfg_patched, outfile, default_flow_style=False)
