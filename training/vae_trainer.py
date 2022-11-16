@@ -33,7 +33,7 @@ class VAETrainer(BaseTrainer):
 
                     reconstructed = self.model(image)
                     kl_loss = self.model.encoder.kl
-                    fn_loss = self.loss_fn(reconstructed, image)
+                    fn_loss = self.loss_fn(reconstructed, image[:,:,0].reshape(reconstructed.shape))
                     loss = (1 - self.kl_weight) * fn_loss + self.kl_weight * kl_loss
                     self.optimizer.zero_grad()
                     loss.backward()

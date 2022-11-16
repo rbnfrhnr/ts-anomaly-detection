@@ -23,12 +23,12 @@ class AETrainer(BaseTrainer):
         self.loss_hist = []
         for epoch in range(self.epochs):
             with tqdm.tqdm(loader, position=0) as pbar:
-                for (image, _) in loader:
+                for (image, y) in loader:
                     image = image.to(self.device).float()
 
                     reconstructed = self.model(image)
 
-                    loss = self.loss_fn(reconstructed, image)
+                    loss = self.loss_fn(reconstructed, image[:,:,0].reshape(reconstructed.shape))
                     self.optimizer.zero_grad()
                     loss.backward()
                     self.optimizer.step()

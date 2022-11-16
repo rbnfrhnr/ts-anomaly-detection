@@ -16,7 +16,6 @@ class VAEAugmentation(BaseAugmentation):
         self.model.eval()
 
     def augment(self, sample, *args, **kwargs):
-        sample = sample.reshape(*sample.shape, 1)
         z = self.model.encoder(torch.Tensor(sample).to(self.device))
         means = torch.zeros((sample.shape[0], self.model.latent_dim)).to(self.device)
         stdv = torch.zeros((sample.shape[0], self.model.latent_dim)).to(self.device) + self.std
@@ -26,4 +25,4 @@ class VAEAugmentation(BaseAugmentation):
         filter_window = min(40, math.floor((new_x.shape[1] * 0.5)))
         polyorder = min(filter_window - 1, 7)
         new_x = savgol_filter(new_x.reshape(-1, self.t_steps), filter_window, polyorder)
-        return new_x
+        return new_x.reshape(sample.shape)

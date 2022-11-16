@@ -12,7 +12,7 @@ if __name__ == '__main__':
     tmpl = sys.argv[1]
     tmpl_vals = sys.argv[2]
 
-    n = 10
+    n = 7
     generated_path = "./config/templates/augmentations-1/generated/"
     Path(generated_path).mkdir(parents=True, exist_ok=True)
 
@@ -27,8 +27,6 @@ if __name__ == '__main__':
             print("iter", i, "comb idx", idx, "of", len(combs))
             comb_dict = {key: comb[idx] for idx, key in enumerate(val_keys)}
             comb_dict["T_STEPS"] = ucr_set_to_window[comb_dict["SET_NUMBER"]]
-            comb_dict["GENERATOR_PATH"] = comb_dict["GENERATOR_PATH"] + "/" + comb_dict["SET_NUMBER"] + "-" + str(comb_dict[
-                "T_STEPS"]) + "-generator.pkl"
             cfg_patched = replace_vars_in_cfg(cfg.copy(), comb_dict)
             str_comb = [str(v) for v in comb]
             f_name = str(hash(comb)) + ".yaml"
@@ -36,6 +34,6 @@ if __name__ == '__main__':
             with open(file, 'w+') as outfile:
                 yaml.dump(cfg_patched, outfile, default_flow_style=False)
             t_start = time.time()
-            os.system('python3 main.py ' + file)
+            os.system('python3 main_model_only.py ' + file)
             dur = time.time() - t_start
             print("seconds:", dur)
