@@ -11,6 +11,7 @@ class VAEAugmentation(BaseAugmentation):
         self.vae_path = self.augment_cfg["generator_location"]
         self.device = cfg["torch-device"]
         self.std = self.augment_cfg["std"]
+        self.smooth = self.augment_cfg["smooth"] if "smooth" in self.augment_cfg else True
         self.model = torch.load(self.vae_path)
         self.t_steps = cfg["data"]["t_steps"]
         self.model.eval()
@@ -22,7 +23,11 @@ class VAEAugmentation(BaseAugmentation):
         new_z = z + torch.normal(mean=means, std=stdv)
         new_x = self.model.decoder(new_z)
         new_x = new_x.detach().cpu().numpy()
-        filter_window = min(40, math.floor((new_x.shape[1] * 0.5)))
-        polyorder = min(filter_window - 1, 7)
-        new_x = savgol_filter(new_x.reshape(-1, self.t_steps), filter_window, polyorder)
-        return new_x.reshape(sample.shape)
+
+        if self.smooth:
+            filter_window = min(40, math.floor((new_x.shape[1] * 0.5)))
+            polyorder = min(filter_window - 1, 7)
+            new_x = savgol_filter(new_x.reshape(-1, self.t_steps), filter_window, polyorder)
+            return new_x.reshape(sample.shape)
+
+        return new_x

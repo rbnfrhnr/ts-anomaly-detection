@@ -1,24 +1,23 @@
-experiment-name: test
+experiment-name: vae_generate_no_smooth
 use_gpu: yes
 
 evaluator: ucr_evaluator
 
 logging:
   logger-name: anomaly-detection
-  log-location: ./out/runs/test
+  log-location: ./out/runs/augmentations-exp-1
 
 augmentation:
   name: "vae_generate"
   config:
-    generator_location: "./out/runs/hp_sweep/generator_hp_sweep/generator_hp_sweep-2022-10-30-10-57-21/model-checkpoints/model-final.pkl"
+    generator_location: ${GENERATOR_PATH}
     std: 0.1
     mean: 0.0
     smooth: false
 
-
 autoencoder:
   type: VAE
-  latent_dim: 10
+  latent_dim: ${LATENT_DIM}
   encoder:
     layers:
       - name: LSTM
@@ -30,38 +29,27 @@ autoencoder:
       - name: RNNExtract
       - name: Reshape
         config:
-          out_shape: [ -1, 120 ]
+          out_shape: [ -1, '${T_STEPS}' ]
       - name: ReLU
       - name: Linear
         config:
-          in_features: 120
-          out_features: 64
-      - name: ReLU
-      - name: Linear
-        config:
-          in_features: 64
-          out_features: 32
-
+          in_features: ${T_STEPS}
+          out_features: 10
   decoder:
     layers:
       - name: Linear
         config:
-          in_features: 10
-          out_features: 32
+          in_features: ${LATENT_DIM}
+          out_features: 24
       - name: ReLU
       - name: Linear
         config:
-          in_features: 32
-          out_features: 64
-      - name: ReLU
-      - name: Linear
-        config:
-          in_features: 64
-          out_features: 120
+          in_features: 24
+          out_features: ${T_STEPS}
       - name: ReLU
       - name: Reshape
         config:
-          out_shape: [ -1, 120, 1 ]
+          out_shape: [ -1, '${T_STEPS}', 1 ]
       - name: LSTM
         config:
           input_size: 1
@@ -73,9 +61,8 @@ autoencoder:
 training:
   trainer_name: 'vae_trainer'
   epochs: 500
-  batch_size: 64
-#  kl_weight: 1.0e-5
-  kl_weight: 0.0
+  batch_size: ${BATCH_SIZE}
+  kl_weight: ${KL_WEIGHT}
   infos: True
   save_checkpoint: true
   checkpoint_interval: 50
@@ -84,15 +71,11 @@ training:
 
 data:
   data-set: ucr
-  location: /home/robin/Documents/lbnl/crd/datasets/AnomalyDatasets_2021/UCR_TimeSeriesAnomalyDatasets2021/FilesAreInHere/UCR_Anomaly_FullData
-  # will be overridden by main function with run_dir
-  #  cache_location: ./data-cache/ucr
-  #  set_number: '197'
-  set_number: '006'
-  t_steps: 120
+  location: ${DATA_LOCATION}
+  set_number: ${SET_NUMBER}
+  t_steps: ${T_STEPS}
   cache_name: 'ucr-002-90'
   compression: zip
-  differentiate: false
 
 downstream:
   type: 'SRD'
@@ -102,5 +85,4 @@ downstream:
       type: 'kdepy'
       config:
         plot_density: True
-#        bandwith: 'ISJ'
         bandwith: 'silverman'
