@@ -58,9 +58,12 @@ class SingularRollingDensity(DownstreamBase):
         errs = np.concatenate(errs)
         probs = self.pdf.evaluate(errs)
 
-        m = np.zeros((probs.shape[0], probs.shape[0] + window_size))
+        m = np.zeros(probs.shape[0] + window_size)
         for idx, rec in enumerate(probs):
-            m[idx:idx + 1, idx:idx + window_size] = rec.repeat(window_size)
-        means = np.array(np.ma.average(m, axis=0, weights=(m > 0))[:-window_size - 1])
-        means[:window_size] = means[:window_size].mean().repeat(window_size)
+            m[idx:idx + window_size] += rec.repeat(window_size)
+
+        weights = np.minimum(np.arange(1, m.shape[0] + 1), np.repeat(120, m.shape[0]))
+        weights[-window_size + 1:] = np.arange(119, 0, -1)
+        means = m / weights
+        means = means[:-window_size - 1]
         return means
