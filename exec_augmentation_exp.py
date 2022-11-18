@@ -27,8 +27,9 @@ if __name__ == '__main__':
             print("iter", i, "comb idx", idx, "of", len(combs))
             comb_dict = {key: comb[idx] for idx, key in enumerate(val_keys)}
             comb_dict["T_STEPS"] = ucr_set_to_window[comb_dict["SET_NUMBER"]]
-            comb_dict["GENERATOR_PATH"] = comb_dict["GENERATOR_PATH"] + "/" + comb_dict["SET_NUMBER"] + "-" + str(comb_dict[
-                "T_STEPS"]) + "-generator.pkl"
+            if "GENERATOR_PATH" in comb_dict:
+                comb_dict["GENERATOR_PATH"] = comb_dict["GENERATOR_PATH"] + "/" + comb_dict["SET_NUMBER"] + "-" + str(
+                    comb_dict["T_STEPS"]) + "-generator.pkl"
             cfg_patched = replace_vars_in_cfg(cfg.copy(), comb_dict)
             str_comb = [str(v) for v in comb]
             f_name = str(hash(comb)) + ".yaml"

@@ -34,7 +34,8 @@ class UCRDataset(Dataset):
         self.differentiate = cfg["differentiate"] if "differentiate" in cfg else False
 
         self.cache_name = self.cache_name if compression is None else self.cache_name + "." + compression
-        cache_path = pathlib.Path(self.cache_location).joinpath(self.cache_name + ".csv")
+        cache_path = pathlib.Path(self.cache_location).joinpath(
+            self.cache_name + ".csv") if self.cache_location is not None else pathlib.Path("foo")
         if cache_path.exists() and self.use_cache:
             self.train_data, self.test_data = self.load_from_cache()
         else:
@@ -45,9 +46,10 @@ class UCRDataset(Dataset):
             train_x = scaler.transform(train_x.reshape(-1, train_x.shape[-1])).reshape(train_x.shape)
             test_x = scaler.transform(test_x.reshape(-1, test_x.shape[-1])).reshape(test_x.shape)
             if self.batch_transform:
+                n = train_x.shape[0]
                 train_x_transformed = self.batch_transform(train_x)
                 train_x = np.concatenate([train_x, train_x_transformed])
-                train_y = np.repeat(train_y, 2).reshape(-1, 1)
+                train_y = np.repeat(train_y, train_x.shape[0] // n).reshape(-1, 1)
 
             self.train_data = (train_x, train_y)
             self.test_data = (test_x, test_y)
