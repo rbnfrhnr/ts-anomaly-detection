@@ -1,7 +1,9 @@
+import numpy as np
 import torch
 from scipy.signal import savgol_filter
 from augmentations.augmentation_base import BaseAugmentation
 import math
+from torch.utils.data import DataLoader, TensorDataset
 
 
 class VAEAugmentation(BaseAugmentation):
@@ -17,17 +19,25 @@ class VAEAugmentation(BaseAugmentation):
         self.model.eval()
 
     def augment(self, sample, *args, **kwargs):
-        z = self.model.encoder(torch.Tensor(sample).to(self.device))
-        means = torch.zeros((sample.shape[0], self.model.latent_dim)).to(self.device)
-        stdv = torch.zeros((sample.shape[0], self.model.latent_dim)).to(self.device) + self.std
-        new_z = z + torch.normal(mean=means, std=stdv)
-        new_x = self.model.decoder(new_z)
-        new_x = new_x.detach().cpu().numpy()
-
+        xx = torch.Tensor(sample).to(self.device)
+        dataset = TensorDataset(xx, torch.ones(xx.shape[0]))
+        loader = torch.utils.data.DataLoader(dataset=dataset,
+                                             batch_size=512,
+                                             shuffle=True)
+        augmented = []
+        for x, _ in loader:
+            z = self.model.encoder(x)
+            means = torch.zeros((x.shape[0], self.model.latent_dim)).to(self.device)
+            stdv = torch.zeros((x.shape[0], self.model.latent_dim)).to(self.device) + self.std
+            new_z = z + torch.normal(mean=means, std=stdv)
+            new_x = self.model.decoder(new_z)
+            new_x = new_x.detach().cpu().numpy()
+            augmented.append(new_x)
+        augmented = np.concatenate(augmented)
         if self.smooth:
-            filter_window = min(40, math.floor((new_x.shape[1] * 0.5)))
+            filter_window = min(40, math.floor((augmented.shape[1] * 0.5)))
             polyorder = min(filter_window - 1, 7)
-            new_x = savgol_filter(new_x.reshape(-1, self.t_steps), filter_window, polyorder)
-            return new_x.reshape(sample.shape)
+            augmented = savgol_filter(augmented.reshape(-1, self.t_steps), filter_window, polyorder)
+            return augmented.reshape(sample.shape)
 
-        return new_x
+        return augmented
