@@ -13,7 +13,7 @@ augmentation:
     generator_location: ${GENERATOR_PATH}
     std: 0.1
     mean: 0.0
-    replicate_factor: 3
+    replication_factor: 3
 
 autoencoder:
   type: VAE
