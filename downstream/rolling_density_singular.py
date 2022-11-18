@@ -62,8 +62,8 @@ class SingularRollingDensity(DownstreamBase):
         for idx, rec in enumerate(probs):
             m[idx:idx + window_size] += rec.repeat(window_size)
 
-        weights = np.minimum(np.arange(1, m.shape[0] + 1), np.repeat(120, m.shape[0]))
-        weights[-window_size + 1:] = np.arange(119, 0, -1)
+        weights = np.minimum(np.arange(1, m.shape[0] + 1), np.repeat(window_size, m.shape[0]))
+        weights[-window_size + 1:] = np.arange(window_size - 1, 0, -1)
         means = m / weights
         means = means[:-window_size - 1]
         return means
