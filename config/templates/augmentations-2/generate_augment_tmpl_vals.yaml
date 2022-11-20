@@ -1,0 +1,7 @@
+LATENT_DIM: [ 4 ]
+BATCH_SIZE: [ 512 ]
+KL_WEIGHT: [ 1.0e-5 ]
+SET_NUMBER: [ '006', '022', '028', '033', '035', '053', '054', '059', '062', '070', '083','102', '114',
+              '119', '121', '123', '131', '138', '173', '193', '197', '221', '229', '236', '249' ]
+DATA_LOCATION: [ '/home/robin/Documents/lbnl/crd/datasets/AnomalyDatasets_2021/UCR_TimeSeriesAnomalyDatasets2021/FilesAreInHere/UCR_Anomaly_FullData' ]
+GENERATOR_PATH: [ './analysis/generators' ]

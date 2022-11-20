@@ -13,7 +13,7 @@ if __name__ == '__main__':
     tmpl_vals = sys.argv[2]
 
     n = 10
-    generated_path = "./config/templates/augmentations-1/generated/"
+    generated_path = "./config/templates/augmentations-2/generated/"
     Path(generated_path).mkdir(parents=True, exist_ok=True)
 
     vals = yaml.load(open(tmpl_vals, "r"), Loader=yaml.FullLoader)

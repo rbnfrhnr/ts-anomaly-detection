@@ -23,12 +23,20 @@ def create_data_cfg(set_nr):
                 "t_steps": ucr_set_to_window[set_nr]}
     return data_cfg
 
+ucr_sets = ['006', '022', '028', '033', '035', '053', '054', '059', '062', '070',
+            '083', '102', '114', '119', '121', '123', '131', '138', '173', '193',
+            '197', '221', '229', '236', '249']
 
-cfg = create_data_cfg("035")
+
+ok = ["022", "033", "070", "121", "138", "173"]
+meh = ["006", "028", "035", "102", "114", "119", "131","193", "197", "236"]
+nope = ["053", "054", "059", "062", "083", "123", "221", "229", "249"]
+
+cfg = create_data_cfg("197")
 generator_path = generator_path + "/" + cfg["set_number"] + "-" + str(cfg["t_steps"]) + "-generator.pkl"
 generator = torch.load(generator_path)
 dataset = UCRDataset(**cfg)
-sample = dataset[130][0].reshape(1, *dataset[130][0].shape)
+sample = dataset[650][0].reshape(1, *dataset[0][0].shape)
 z = generator.encoder(torch.Tensor(sample).to(device))
 means = torch.zeros((sample.shape[0], 4)).to(device)
 stdv = torch.zeros((sample.shape[0], 4)).to(device) + 0.1
