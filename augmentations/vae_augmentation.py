@@ -14,6 +14,8 @@ class VAEAugmentation(BaseAugmentation):
         self.device = cfg["torch-device"]
         self.std = self.augment_cfg["std"]
         self.smooth = self.augment_cfg["smooth"] if "smooth" in self.augment_cfg else True
+        self.min_filter_window = self.augment_cfg[
+            "min_filter_window"] if "min_filter_window" in self.augment_cfg else 40
         self.model = torch.load(self.vae_path)
         self.t_steps = cfg["data"]["t_steps"]
         self.model.eval()
@@ -35,7 +37,7 @@ class VAEAugmentation(BaseAugmentation):
             augmented.append(new_x)
         augmented = np.concatenate(augmented)
         if self.smooth:
-            filter_window = min(40, math.floor((augmented.shape[1] * 0.5)))
+            filter_window = min(self.min_filter_window, math.floor((augmented.shape[1] * 0.5)))
             polyorder = min(filter_window - 1, 7)
             augmented = savgol_filter(augmented.reshape(-1, self.t_steps), filter_window, polyorder)
             return augmented.reshape(sample.shape)
