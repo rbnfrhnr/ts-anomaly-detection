@@ -1,0 +1,85 @@
+experiment-name: ae_replicate
+use_gpu: yes
+
+evaluator: ucr_evaluator
+
+logging:
+  logger-name: anomaly-detection
+  log-location: ./out/runs/augmentations-exp-2
+
+augmentation:
+  name: "replicate"
+  config:
+    null: null
+
+autoencoder:
+  type: AE
+  latent_dim: ${LATENT_DIM}
+  encoder:
+    layers:
+      - name: LSTM
+        config:
+          input_size: 1
+          hidden_size: 1
+          num_layers: 1
+          batch_first: true
+      - name: RNNExtract
+      - name: Reshape
+        config:
+          out_shape: [ -1, '${T_STEPS}' ]
+      - name: ReLU
+      - name: Linear
+        config:
+          in_features: ${T_STEPS}
+          out_features: 10
+  decoder:
+    layers:
+      - name: Linear
+        config:
+          in_features: ${LATENT_DIM}
+          out_features: 24
+      - name: ReLU
+      - name: Linear
+        config:
+          in_features: 24
+          out_features: ${T_STEPS}
+      - name: ReLU
+      - name: Reshape
+        config:
+          out_shape: [ -1, '${T_STEPS}', 1 ]
+      - name: LSTM
+        config:
+          input_size: 1
+          hidden_size: 1
+          num_layers: 1
+          batch_first: true
+      - name: RNNExtract
+
+training:
+  trainer_name: 'ae_trainer'
+  epochs: 500
+  batch_size: ${BATCH_SIZE}
+  kl_weight: ${KL_WEIGHT}
+  infos: True
+  save_checkpoint: true
+  checkpoint_interval: 50
+  save_best: true
+  save_latest: true
+
+data:
+  data-set: ucr
+  location: ${DATA_LOCATION}
+  set_number: ${SET_NUMBER}
+  t_steps: ${T_STEPS}
+  cache_name: 'ucr-002-90'
+  compression: zip
+
+downstream:
+  type: 'SRD'
+  config:
+    batch_size: 10000
+    density:
+      type: 'kdepy'
+      config:
+        plot_density: True
+        bandwith: 'silverman'
