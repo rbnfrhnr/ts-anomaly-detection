@@ -8,7 +8,7 @@ logging:
   log-location: ./out/runs/augmentations-exp-2
 
 augmentation:
-  name: "ae_generate"
+  name: "vae_generate"
   config:
     generator_location: ${GENERATOR_PATH}
     std: 0.1
