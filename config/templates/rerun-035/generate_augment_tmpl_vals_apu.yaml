@@ -1,0 +1,6 @@
+LATENT_DIM: [ 4 ]
+BATCH_SIZE: [ 512 ]
+KL_WEIGHT: [ 1.0e-5 ]
+SET_NUMBER: [ '035' ]
+DATA_LOCATION: [ '/home/ubuntu/AnomalyDatasets_2021/UCR_TimeSeriesAnomalyDatasets2021/FilesAreInHere/UCR_Anomaly_FullData' ]
+GENERATOR_PATH: [ './analysis/generators-2' ]
